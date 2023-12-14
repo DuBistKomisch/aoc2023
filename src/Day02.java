@@ -1,8 +1,6 @@
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 public class Day02 implements Day {
     static final Map<String, Integer> limits = Map.of(
