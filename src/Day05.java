@@ -71,7 +71,6 @@ public class Day05 implements Day {
                 return newSeeds.stream();
             }).collect(Collectors.toList());
         }
-        System.out.println(seeds);
         return seeds.stream().mapToLong(range -> range.from).min().getAsLong();
     }
 
