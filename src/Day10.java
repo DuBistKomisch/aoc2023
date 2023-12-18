@@ -12,67 +12,151 @@ public class Day10 implements Day {
     public Object part1(String input) {
         var lines = input.split(System.lineSeparator());
         var pipes = new HashMap<Point, Pipe>();
+        var grid = new HashMap<Point, Boolean>();
         Point start = new Point(-1, -1);
-        for (var y = 0; y < lines.length; y += 1) {
-            for (var x = 0; x < lines[y].length(); x += 1) {
+        var height = lines.length;
+        var width = lines[0].length();
+        for (var y = 0; y < height; y += 1) {
+            for (var x = 0; x < width; x += 1) {
                 var point = new Point(x, y);
                 var symbol = lines[y].charAt(x);
-                if (symbol == 'S') {
-                    start = point;
+                var pipe = Pipe.fromSymbol(symbol);
+                pipes.put(point, pipe);
+                // also fill in 2x resolution grid with connections
+                var point2 = new Point(2 * x + 1, 2 * y + 1);
+                grid.put(point2, true);
+                if (pipe.hasWest() && x > 0 && pipes.get(point.west()).hasEast()) {
+                    grid.put(point2.west(), true);
                 }
-                pipes.put(point, Pipe.fromSymbol(symbol));
+                if (pipe.hasNorth() && y > 0 && pipes.get(point.north()).hasSouth()) {
+                    grid.put(point2.north(), true);
+                }
+                // also mark start
+                if (symbol == 'S') {
+                    start = point2;
+                }
             }
         }
+        // bfs along pipes tracking distance
         var distances = new HashMap<Point, Integer>();
         distances.put(start, 0);
         var queue = new ArrayDeque<Candidate>();
-        if (pipes.get(start.north()).hasSouth()) {
-            queue.add(new Candidate(start.north(), start));
-        }
-        if (pipes.get(start.south()).hasNorth()) {
-            queue.add(new Candidate(start.south(), start));
-        }
-        if (pipes.get(start.east()).hasWest()) {
-            queue.add(new Candidate(start.east(), start));
-        }
-        if (pipes.get(start.west()).hasEast()) {
-            queue.add(new Candidate(start.west(), start));
-        }
+        queue.add(new Candidate(start.north(), start));
+        queue.add(new Candidate(start.south(), start));
+        queue.add(new Candidate(start.east(), start));
+        queue.add(new Candidate(start.west(), start));
         Candidate candidate;
         while ((candidate = queue.poll()) != null) {
             var next = candidate.next;
-            var pipe = pipes.get(next);
-            if (pipe == null) {
+            if (grid.get(next) == null) {
                 continue;
             }
             var distance = distances.get(candidate.previous) + 1;
             if (distances.get(next) != null) {
                 if (distances.get(next) == distance) {
-                    return distance;
+                    // stop once we reach the point where distances are equal
+                    // answer is distances scaled back down to 1x resolution
+                    return distance / 2;
                 } else {
                     continue;
                 }
             }
             distances.put(next, distance);
-            if (pipe.hasNorth() && pipes.get(next.north()).hasSouth()) {
-                queue.add(new Candidate(next.north(), next));
-            }
-            if (pipe.hasSouth() && pipes.get(next.south()).hasNorth()) {
-                queue.add(new Candidate(next.south(), next));
-            }
-            if (pipe.hasEast() && pipes.get(next.east()).hasWest()) {
-                queue.add(new Candidate(next.east(), next));
-            }
-            if (pipe.hasWest() && pipes.get(next.west()).hasEast()) {
-                queue.add(new Candidate(next.west(), next));
-            }
+            queue.add(new Candidate(next.north(), next));
+            queue.add(new Candidate(next.south(), next));
+            queue.add(new Candidate(next.east(), next));
+            queue.add(new Candidate(next.west(), next));
         }
         return 0;
     }
 
     @Override
     public Object part2(String input) {
-        return 0;
+        var lines = input.split(System.lineSeparator());
+        var pipes = new HashMap<Point, Pipe>();
+        var grid = new HashMap<Point, Boolean>();
+        Point start = new Point(-1, -1);
+        var height = lines.length;
+        var width = lines[0].length();
+        for (var y = 0; y < height; y += 1) {
+            for (var x = 0; x < width; x += 1) {
+                var point = new Point(x, y);
+                var symbol = lines[y].charAt(x);
+                var pipe = Pipe.fromSymbol(symbol);
+                pipes.put(point, pipe);
+                // also fill in 2x resolution grid with connections
+                var point2 = new Point(2 * x + 1, 2 * y + 1);
+                grid.put(point2, true);
+                if (pipe.hasWest() && x > 0 && pipes.get(point.west()).hasEast()) {
+                    grid.put(point2.west(), true);
+                }
+                if (pipe.hasNorth() && y > 0 && pipes.get(point.north()).hasSouth()) {
+                    grid.put(point2.north(), true);
+                }
+                // also mark start
+                if (symbol == 'S') {
+                    start = point2;
+                }
+            }
+        }
+        // bfs along pipes tracking distance
+        var distances = new HashMap<Point, Integer>();
+        distances.put(start, 0);
+        var queue = new ArrayDeque<Candidate>();
+        queue.add(new Candidate(start.north(), start));
+        queue.add(new Candidate(start.south(), start));
+        queue.add(new Candidate(start.east(), start));
+        queue.add(new Candidate(start.west(), start));
+        Candidate candidate;
+        while ((candidate = queue.poll()) != null) {
+            var next = candidate.next;
+            if (grid.get(next) == null) {
+                continue;
+            }
+            var distance = distances.get(candidate.previous) + 1;
+            if (distances.get(next) != null) {
+                if (distances.get(next) == distance) {
+                    // stop once we reach the point where distances are equal
+                    break;
+                } else {
+                    continue;
+                }
+            }
+            distances.put(next, distance);
+            queue.add(new Candidate(next.north(), next));
+            queue.add(new Candidate(next.south(), next));
+            queue.add(new Candidate(next.east(), next));
+            queue.add(new Candidate(next.west(), next));
+        }
+        // flood fill outside the points marked in distances
+        var fill = new HashMap<Point, Boolean>();
+        var queue2 = new ArrayDeque<Point>();
+        queue2.add(new Point(0, 0));
+        Point candidate2;
+        while ((candidate2 = queue2.poll()) != null) {
+            if (fill.containsKey(candidate2) || distances.containsKey(candidate2)) {
+                continue;
+            }
+            if (candidate2.x < 0 || candidate2.y < 0 || candidate2.x > width * 2 || candidate2.y > height * 2) {
+                continue;
+            }
+            fill.put(candidate2, true);
+            queue2.add(candidate2.north());
+            queue2.add(candidate2.south());
+            queue2.add(candidate2.east());
+            queue2.add(candidate2.west());
+        }
+        // now any point scaled back to 1x resolution not marked is internal
+        var area = 0;
+        for (var y = 0; y < height; y += 1) {
+            for (var x = 0; x < width; x += 1) {
+                var point = new Point(2 * x + 1, 2 * y + 1);
+                if (!fill.containsKey(point) && !distances.containsKey(point)) {
+                    area += 1;
+                }
+            }
+        }
+        return area;
     }
 
     class Candidate {
@@ -136,7 +220,8 @@ public class Day10 implements Day {
         NORTH_EAST,
         NORTH_WEST,
         SOUTH_WEST,
-        SOUTH_EAST;
+        SOUTH_EAST,
+        ALL;
 
         static Pipe fromSymbol(char symbol) {
             return switch (symbol) {
@@ -146,24 +231,25 @@ public class Day10 implements Day {
                 case 'J' -> NORTH_WEST;
                 case '7' -> SOUTH_WEST;
                 case 'F' -> SOUTH_EAST;
+                case 'S' -> ALL;
                 default -> NONE;
             };
         }
 
         boolean hasNorth() {
-            return this == VERTICAL || this == NORTH_EAST || this == NORTH_WEST;
+            return this == VERTICAL || this == NORTH_EAST || this == NORTH_WEST || this == ALL;
         }
 
         boolean hasSouth() {
-            return this == VERTICAL || this == SOUTH_EAST || this == SOUTH_WEST;
+            return this == VERTICAL || this == SOUTH_EAST || this == SOUTH_WEST || this == ALL;
         }
 
         boolean hasEast() {
-            return this == HORIZONTAL || this == NORTH_EAST || this == SOUTH_EAST;
+            return this == HORIZONTAL || this == NORTH_EAST || this == SOUTH_EAST || this == ALL;
         }
 
         boolean hasWest() {
-            return this == HORIZONTAL || this == NORTH_WEST || this == SOUTH_WEST;
+            return this == HORIZONTAL || this == NORTH_WEST || this == SOUTH_WEST || this == ALL;
         }
     }
 }
