@@ -25,6 +25,15 @@ public class Point {
         return new Point(x - 1, y);
     }
 
+    Point step(Dir dir) {
+        return switch (dir) {
+            case NORTH -> north();
+            case SOUTH -> south();
+            case EAST -> east();
+            case WEST -> west();
+        };
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
