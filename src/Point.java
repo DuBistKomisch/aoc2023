@@ -10,27 +10,47 @@ public class Point {
     }
 
     Point north() {
-        return new Point(x, y - 1);
+        return north(1);
+    }
+
+    Point north(int distance) {
+        return new Point(x, y - distance);
     }
 
     Point south() {
-        return new Point(x, y + 1);
+        return south(1);
+    }
+
+    Point south(int distance) {
+        return new Point(x, y + distance);
     }
 
     Point east() {
-        return new Point(x + 1, y);
+        return east(1);
+    }
+
+    Point east(int distance) {
+        return new Point(x + distance, y);
     }
 
     Point west() {
-        return new Point(x - 1, y);
+        return west(1);
+    }
+
+    Point west(int distance) {
+        return new Point(x - distance, y);
     }
 
     Point step(Dir dir) {
+        return step(dir, 1);
+    }
+
+    Point step(Dir dir, int distance) {
         return switch (dir) {
-            case NORTH -> north();
-            case SOUTH -> south();
-            case EAST -> east();
-            case WEST -> west();
+            case NORTH -> north(distance);
+            case SOUTH -> south(distance);
+            case EAST -> east(distance);
+            case WEST -> west(distance);
         };
     }
 
