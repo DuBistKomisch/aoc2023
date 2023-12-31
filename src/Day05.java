@@ -74,24 +74,6 @@ public class Day05 implements Day {
         return seeds.stream().mapToLong(range -> range.from).min().getAsLong();
     }
 
-    class Range {
-        long from;
-        long length;
-
-        Range(long from, long length) {
-            this.from = from;
-            this.length = length;
-        }
-
-        @Override
-        public String toString() {
-            return "Range{" +
-                    "from=" + from +
-                    ", length=" + length +
-                    '}';
-        }
-    }
-
     private List<TreeMap<Long, Range>> toMappingsList(String[] lines) {
         var mappingsList = new ArrayList<TreeMap<Long, Range>>();
         int line = 3;
