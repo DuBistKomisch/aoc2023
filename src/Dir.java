@@ -13,4 +13,22 @@ public enum Dir {
             default -> throw new IllegalArgumentException();
         };
     }
+
+    Dir clockwise() {
+        return switch (this) {
+            case NORTH -> EAST;
+            case EAST -> SOUTH;
+            case SOUTH -> WEST;
+            case WEST -> NORTH;
+        };
+    }
+
+    Dir anticlockwise() {
+        return switch (this) {
+            case NORTH -> WEST;
+            case EAST -> NORTH;
+            case SOUTH -> EAST;
+            case WEST -> SOUTH;
+        };
+    }
 }
